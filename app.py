@@ -70,8 +70,8 @@ if st.button("Generate"):
         single_height=0.45,
         dpi=300,
         ax_para={"c": "black", "linewidth": 1.3, "linestyle": "-"},
-        tick_para={"direction": "in", "length": 3, "width": 1.5},
-        xtick_para={"fontsize": 10, "fontfamily": "Arial", "fontweight": "bold"},
+        tick_para={"direction": "in", "length": 3, "width": 1.5, "values": [0, 1]},
+        xtick_para={"fontsize": 10, "fontfamily": "Arial", "fontweight": "bold", "values": [0, 1]},
         ylabel_para={
             "fontsize": 12,
             "fontname": "Arial",
