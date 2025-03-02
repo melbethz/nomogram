@@ -1,111 +1,87 @@
-import streamlit as st
 import math
+import streamlit as st
 import simpleNomo
 import matplotlib.pyplot as plt
 
-# -----------------------------------------------------------------------------
-# 1. App Title & Description
-# -----------------------------------------------------------------------------
-st.title("Nomogram for Postoperative Bleeding Risk")
+########################################
+# Logistic-Regression Coefficients
+# (Replace with your own if needed)
+########################################
+INTERCEPT = -3.7634
+C_HAS     =  0.0284
+C_ALCOHOL =  0.9575
+C_PAI     =  1.0074
+C_OAT     =  0.5272
+C_BRIDGE  =  1.0557
 
-st.write("""
-This interactive app calculates the risk of postoperative bleeding based on a logistic regression model.
-Enter your predictor values below and see both the calculated risk and the nomogram.
+def compute_risk(has_bled, alcohol, pai, oat, bridging):
+    """
+    Computes predicted probability using your logistic model:
+    Probability = 1 / (1 + exp( - (intercept + sum_of_coeffs * X) ))
+    """
+    y = (INTERCEPT
+         + C_HAS     * has_bled
+         + C_ALCOHOL * alcohol
+         + C_PAI     * pai
+         + C_OAT     * oat
+         + C_BRIDGE  * bridging)
+    prob = 1.0 / (1.0 + math.exp(-y))
+    return prob
+
+########################################
+# Streamlit App
+########################################
+st.title("Postoperative Bleeding Nomogram & Risk Calculator")
+
+st.markdown("""
+**Instructions:**
+- Enter the predictor values below.
+- Click **Generate** to see the standard nomogram image and the predicted risk
+  based on the logistic‐regression model.
+  
+_Note:_ The *simpleNomo* nomogram is static (it does not dynamically place pointers).
+You can visually interpret the chart or rely on the computed risk below.
 """)
 
-# -----------------------------------------------------------------------------
-# 2. User Inputs
-# -----------------------------------------------------------------------------
-# Use unique keys for each widget to avoid duplicate element ID errors.
-has_bled = st.number_input(
-    "HAS-BLED Score (0 to 9)",
-    min_value=0,
-    max_value=9,
-    value=3,
-    key="has_bled"
-)
+# 1) User inputs (unique `key` for each widget)
+has_bled = st.number_input("HAS-BLED Score (0 to 9)",
+                           min_value=0, max_value=9, value=3, key="has_bled")
+alcohol  = st.number_input("High-Risk Alcohol (0=No, 1=Yes)",
+                           min_value=0, max_value=1, value=0, key="alc")
+pai      = st.number_input("Platelet Aggregation Inhibitor (0=No, 1=Yes)",
+                           min_value=0, max_value=1, value=0, key="pai")
+oat      = st.number_input("Oral Anticoagulation (0=No, 1=Yes)",
+                           min_value=0, max_value=1, value=0, key="oat")
+bridge   = st.number_input("Perioperative Bridging (0=No, 1=Yes)",
+                           min_value=0, max_value=1, value=0, key="bridge")
 
-alcohol = st.selectbox(
-    "High-Risk Alcohol Consumption?",
-    ["No", "Yes"],
-    key="alcohol_key"
-)
+# 2) Button to generate
+if st.button("Generate"):
+    # (A) Calculate the predicted risk from logistic model
+    risk = compute_risk(has_bled, alcohol, pai, oat, bridge)
+    st.write(f"**Predicted Risk:** {risk*100:.2f}%")
 
-platelet = st.selectbox(
-    "Platelet Aggregation Inhibitor Therapy?",
-    ["No", "Yes"],
-    key="platelet_key"
-)
+    # (B) Generate the nomogram figure from simpleNomo
+    excel_path = "model_2.xlsx"  # Update path if needed
+    fig = simpleNomo.nomogram(
+        path=excel_path,
+        result_title="Postoperative Bleeding Risk",
+        fig_width=10,
+        single_height=0.45,
+        dpi=300,
+        ax_para={"c": "black", "linewidth": 1.3, "linestyle": "-"},
+        tick_para={"direction": "in", "length": 3, "width": 1.5},
+        xtick_para={"fontsize": 10, "fontfamily": "Arial", "fontweight": "bold"},
+        ylabel_para={
+            "fontsize": 12,
+            "fontname": "Arial",
+            "labelpad": 100,
+            "loc": "center",
+            "color": "black",
+            "rotation": "horizontal"
+        },
+        total_point=100
+    )
 
-oral_ant = st.selectbox(
-    "Oral Anticoagulation Therapy?",
-    ["No", "Yes"],
-    key="oral_ant_key"
-)
-
-bridge = st.selectbox(
-    "Perioperative Bridging Therapy?",
-    ["No", "Yes"],
-    key="bridge_key"
-)
-
-# -----------------------------------------------------------------------------
-# 3. Risk Calculation
-# -----------------------------------------------------------------------------
-# Coefficients from your logistic regression model:
-INTERCEPT = -3.7634
-B_HAS     =  0.0284
-B_ALC     =  0.9575
-B_PAI     =  1.0074
-B_OAC     =  0.5272
-B_BRDG    =  1.0557
-
-# Convert selectbox outputs to numeric (0 or 1)
-x_alc  = 1 if alcohol == "Yes" else 0
-x_pai  = 1 if platelet == "Yes" else 0
-x_oac  = 1 if oral_ant == "Yes" else 0
-x_brdg = 1 if bridge == "Yes" else 0
-
-# Compute the log-odds
-log_odds = (INTERCEPT +
-            B_HAS  * has_bled +
-            B_ALC  * x_alc +
-            B_PAI  * x_pai +
-            B_OAC  * x_oac +
-            B_BRDG * x_brdg)
-
-# Convert log-odds to a probability
-predicted_risk = 1.0 / (1.0 + math.exp(-log_odds))
-predicted_percent = predicted_risk * 100
-
-st.markdown(f"### Predicted Bleeding Risk: **{predicted_percent:.2f}%**")
-
-# -----------------------------------------------------------------------------
-# 4. Display the Nomogram
-# -----------------------------------------------------------------------------
-# Ensure that "model.xlsx" is placed in your repository directory.
-excel_path = "model.xlsx"
-
-# Generate the nomogram figure using simpleNomo
-nomo_fig = simpleNomo.nomogram(
-    path=excel_path,
-    result_title="Postoperative Bleeding Risk",
-    fig_width=10,
-    single_height=0.45,
-    dpi=300,
-    ax_para={"c": "black", "linewidth": 1.3, "linestyle": "-"},
-    tick_para={"direction": "in", "length": 3, "width": 1.5},
-    xtick_para={"fontsize": 10, "fontfamily": "Arial", "fontweight": "bold"},
-    ylabel_para={
-        "fontsize": 12,
-        "fontname": "Arial",
-        "labelpad": 100,
-        "loc": "center",
-        "color": "black",
-        "rotation": "horizontal"
-    },
-    total_point=100
-)
-
-# Use Streamlit to display the matplotlib figure
-st.pyplot(nomo_fig)
+    # Show the nomogram in Streamlit
+    st.pyplot(fig)
