@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 ########################################
 # Logistic-Regression Coefficients
-# (Same as your model)
 ########################################
 INTERCEPT = -3.7634
 C_HAS     =  0.0284
@@ -16,36 +15,34 @@ C_BRIDGE  =  1.0557
 
 def compute_risk(has_bled, alcohol, pai, oat, bridging):
     """
-    Logistic model:
-      Probability = 1 / (1 + exp( - (intercept + sum_of_coeffs*X) ))
+    Compute the predicted risk using the logistic model:
+      probability = 1 / (1 + exp( - (intercept + sum(coeff_i * x_i) ) ))
     """
-    y = (INTERCEPT
-         + C_HAS     * has_bled
-         + C_ALCOHOL * alcohol
-         + C_PAI     * pai
-         + C_OAT     * oat
-         + C_BRIDGE  * bridging)
-    prob = 1.0 / (1.0 + math.exp(-y))
-    return prob
+    y = (INTERCEPT +
+         C_HAS     * has_bled +
+         C_ALCOHOL * alcohol +
+         C_PAI     * pai +
+         C_OAT     * oat +
+         C_BRIDGE  * bridging)
+    return 1.0 / (1.0 + math.exp(-y))
 
 ########################################
-# Streamlit App
+# Streamlit App Layout
 ########################################
 st.title("Postoperative Bleeding Nomogram & Risk Calculator")
 
 st.markdown("""
 **Instructions:**
-- Enter each predictor below.
-- Click **Generate** to see:
-  1. The standard nomogram (drawn from `model.xlsx`).
-  2. The computed risk from your logistic model.
+- Enter the predictor values below.
+- Click **Generate** to view:
+  - The nomogram (generated from the Excel file).
+  - The computed risk from the logistic regression model.
 
-_Note:_ The *simpleNomo* chart is static. It won’t dynamically mark your input,
-but by structuring binary features as `_0` and `_1` categories, you get
-only two ticks (no 0.25 increments).
+_Note:_ For the nomogram, binary features are declared as "category" in the Excel
+so that each line shows exactly two ticks: 0 and 1.
 """)
 
-# 1) Gather user inputs (unique keys)
+# 1) Get user inputs with unique keys
 has_bled = st.number_input(
     "HAS-BLED Score (0 to 9)",
     min_value=0, max_value=9, value=3,
@@ -53,33 +50,37 @@ has_bled = st.number_input(
 )
 
 alcohol_choice = st.radio(
-    "High-Risk Alcohol Consumption?", ("No", "Yes"), key="alc_radio"
+    "High-Risk Alcohol Consumption?",
+    ("No", "Yes"), key="alc_radio"
 )
 alcohol = 1 if alcohol_choice == "Yes" else 0
 
 pai_choice = st.radio(
-    "Platelet Aggregation Inhibitor Therapy?", ("No", "Yes"), key="pai_radio"
+    "Platelet Aggregation Inhibitor Therapy?",
+    ("No", "Yes"), key="pai_radio"
 )
 pai = 1 if pai_choice == "Yes" else 0
 
 oat_choice = st.radio(
-    "Oral Anticoagulation Therapy?", ("No", "Yes"), key="oat_radio"
+    "Oral Anticoagulation Therapy?",
+    ("No", "Yes"), key="oat_radio"
 )
 oat = 1 if oat_choice == "Yes" else 0
 
 bridge_choice = st.radio(
-    "Perioperative Bridging Therapy?", ("No", "Yes"), key="bridge_radio"
+    "Perioperative Bridging Therapy?",
+    ("No", "Yes"), key="bridge_radio"
 )
 bridge = 1 if bridge_choice == "Yes" else 0
 
-# 2) Button to generate
+# 2) Generate results on button click
 if st.button("Generate"):
-    # (A) Calculate logistic predicted risk
+    # (A) Calculate the logistic regression predicted risk
     risk = compute_risk(has_bled, alcohol, pai, oat, bridge)
-    st.write(f"**Predicted Risk:** {risk*100:.2f}%")
-
-    # (B) Generate the nomogram from Excel
-    excel_path = "model_2.xlsx"  # Must match your file name
+    st.write(f"**Predicted Bleeding Risk:** {risk * 100:.2f}%")
+    
+    # (B) Generate the nomogram using simpleNomo
+    excel_path = "model_2.xlsx"  # Make sure model.xlsx is in the same directory
     fig = simpleNomo.nomogram(
         path=excel_path,
         result_title="Postoperative Bleeding Risk",
@@ -99,6 +100,6 @@ if st.button("Generate"):
         },
         total_point=100
     )
-
-    # Show the nomogram
+    
+    # Display the nomogram using Streamlit
     st.pyplot(fig)
