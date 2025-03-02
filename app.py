@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 ########################################
 # Logistic-Regression Coefficients
-# (Replace with your own if needed)
+# (Same as your model)
 ########################################
 INTERCEPT = -3.7634
 C_HAS     =  0.0284
@@ -17,7 +17,7 @@ C_BRIDGE  =  1.0557
 def compute_risk(has_bled, alcohol, pai, oat, bridging):
     """
     Logistic model:
-        Probability = 1 / (1 + exp( - [intercept + sum(coeff * X)] ))
+      Probability = 1 / (1 + exp( - (intercept + sum_of_coeffs*X) ))
     """
     y = (INTERCEPT
          + C_HAS     * has_bled
@@ -37,17 +37,19 @@ st.markdown("""
 **Instructions:**
 - Enter each predictor below.
 - Click **Generate** to see:
-  1. The standard nomogram (drawn from your Excel).
+  1. The standard nomogram (drawn from `model.xlsx`).
   2. The computed risk from your logistic model.
 
 _Note:_ The *simpleNomo* chart is static. It won’t dynamically mark your input,
-but you can interpret the 0/1 categories or the numeric scale for HAS-BLED.
+but by structuring binary features as `_0` and `_1` categories, you get
+only two ticks (no 0.25 increments).
 """)
 
-# 1) Gather user inputs (use unique `key=` to avoid ID conflicts):
+# 1) Gather user inputs (unique keys)
 has_bled = st.number_input(
     "HAS-BLED Score (0 to 9)",
-    min_value=0, max_value=9, value=3, key="has_bled"
+    min_value=0, max_value=9, value=3,
+    key="has_bled"
 )
 
 alcohol_choice = st.radio(
@@ -70,14 +72,14 @@ bridge_choice = st.radio(
 )
 bridge = 1 if bridge_choice == "Yes" else 0
 
-# 2) When user clicks "Generate", show risk & nomogram
+# 2) Button to generate
 if st.button("Generate"):
     # (A) Calculate logistic predicted risk
     risk = compute_risk(has_bled, alcohol, pai, oat, bridge)
     st.write(f"**Predicted Risk:** {risk*100:.2f}%")
 
-    # (B) Generate the nomogram from your Excel file
-    excel_path = "model_2.xlsx"  # must match your file name
+    # (B) Generate the nomogram from Excel
+    excel_path = "model_2.xlsx"  # Must match your file name
     fig = simpleNomo.nomogram(
         path=excel_path,
         result_title="Postoperative Bleeding Risk",
@@ -98,5 +100,5 @@ if st.button("Generate"):
         total_point=100
     )
 
-    # Show the nomogram in Streamlit
+    # Show the nomogram
     st.pyplot(fig)
