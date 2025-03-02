@@ -51,50 +51,47 @@ if st.button("Generate"):
     risk = compute_risk(has_bled, alcohol, pai, oat, bridge)
     st.write(f"**Predicted Risk:** {risk*100:.2f}%")
 
-    # (B) Generate the nomogram figure
-    fig, ax = plt.subplots(figsize=(12, 8))
+    # (B) Generate the corrected nomogram figure
+    fig, ax = plt.subplots(figsize=(10, 3))
     
     # Define axes and labels
-    points_scale = np.arange(0, 110, 10)
-    total_score_scale = np.arange(0, 450, 50)
-    risk_scale = np.linspace(0, 1, 6)
+    points_scale = np.arange(0, 110, 10)  # Scale for HAS-BLED (0-100)
+    binary_scale = [0, 1]  # Binary variables (0, 1 only)
+    total_score_scale = np.arange(0, 450, 50)  # Overall points (0-400)
     
     y_labels = [
-        "HAS-BLED Score", "High-risk Alcohol Consumption", "Oral Anticoagulation Therapy", 
-        "Platelet Aggregation Inhibitor Therapy", "Perioperative Bridging Therapy", "Overall Point"
+        "HAS-BLED Score", "High-risk Alcohol Consumption", "Anticoagulation Therapy"
     ]
-    y_positions = np.array([5, 4, 3, 2, 1, 0])
+    y_positions = np.array([2, 1, 0])  # Top to bottom positioning
     
-    # Plot dashed reference lines
-    for y_pos in y_positions[:-1]:
+    # HAS-BLED score line (numerical scale)
+    ax.hlines(y=2, xmin=0, xmax=100, color="black", linewidth=1.5)
+    ax.set_xticks(np.arange(0, 10, 1), minor=True)  # HAS-BLED subscale
+    ax.set_xticklabels(np.arange(0, 10, 1), fontsize=10, fontweight="bold", minor=True)
+    
+    # Binary variable dashed lines
+    for y_pos in y_positions[1:]:  # Skip HAS-BLED row
         ax.hlines(y=y_pos, xmin=0, xmax=100, color="black", linestyle="dashdot", linewidth=1.2)
     
-    ax.hlines(y=0, xmin=0, xmax=400, color="black", linewidth=1.5)
+    # Correct 0-1 labels positioning
+    for y_pos in y_positions[1:]:  # Skip HAS-BLED row
+        ax.text(-5, y_pos, "0", fontsize=12, fontweight="bold", ha="right")
+        ax.text(105, y_pos, "1", fontsize=12, fontweight="bold", ha="left")
     
-    # Format axes
-    ax.set_xticks(points_scale)
-    ax.set_xticklabels(points_scale, fontsize=12, fontweight="bold")
+    # Set Y-axis labels correctly
     ax.set_yticks(y_positions)
-    ax.set_yticklabels(y_labels, fontsize=14, fontweight="bold")
-    ax.set_xlim(0, 400)
-    ax.set_ylim(-1, 6)
+    ax.set_yticklabels(y_labels, fontsize=12, fontweight="bold")
     
-    # Secondary X-axis for total score
-    ax2 = ax.secondary_xaxis('bottom')
-    ax2.set_xticks(total_score_scale)
-    ax2.set_xticklabels(total_score_scale, fontsize=12, fontweight="bold")
+    # X-axis settings
+    ax.set_xticks(points_scale)
+    ax.set_xticklabels(points_scale, fontsize=10, fontweight="bold")
+    ax.set_xlim(-10, 110)
+    ax.set_ylim(-1, 3)
     
-    # Risk graph (sub-plot style)
-    x_risk = np.linspace(0, 400, 100)
-    y_risk = 1 / (1 + np.exp(-0.01 * (200 - x_risk)))
-    ax_risk = ax.inset_axes([0.1, -0.4, 0.8, 0.2])
-    ax_risk.plot(x_risk, y_risk, color="black", linewidth=1.5)
-    ax_risk.set_xticks(total_score_scale)
-    ax_risk.set_xticklabels(total_score_scale, fontsize=10, fontweight="bold")
-    ax_risk.set_yticks(risk_scale)
-    ax_risk.set_yticklabels(risk_scale, fontsize=10, fontweight="bold")
-    ax_risk.set_xlabel("Overall Point", fontsize=12, fontweight="bold")
-    ax_risk.set_ylabel("Positive Risk", fontsize=12, fontweight="bold")
+    # Remove top and right borders
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
     
     # Display in Streamlit
     st.pyplot(fig)
