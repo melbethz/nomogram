@@ -16,8 +16,8 @@ C_BRIDGE  =  1.0557
 
 def compute_risk(has_bled, alcohol, pai, oat, bridging):
     """
-    Computes predicted probability using your logistic model:
-    Probability = 1 / (1 + exp( - (intercept + sum_of_coeffs * X) ))
+    Logistic model:
+        Probability = 1 / (1 + exp( - [intercept + sum(coeff * X)] ))
     """
     y = (INTERCEPT
          + C_HAS     * has_bled
@@ -35,35 +35,49 @@ st.title("Postoperative Bleeding Nomogram & Risk Calculator")
 
 st.markdown("""
 **Instructions:**
-- Enter the predictor values below.
-- Click **Generate** to see the standard nomogram image and the predicted risk
-  based on the logistic‐regression model.
+- Enter each predictor below.
+- Click **Generate** to see:
+  1. The standard nomogram (drawn from your Excel).
+  2. The computed risk from your logistic model.
 
-_Note:_ The *simpleNomo* nomogram is static (it does not dynamically place pointers).
-You can visually interpret the chart or rely on the computed risk below.
+_Note:_ The *simpleNomo* chart is static. It won’t dynamically mark your input,
+but you can interpret the 0/1 categories or the numeric scale for HAS-BLED.
 """)
 
-# 1) User inputs (each with a unique `key`)
-has_bled = st.number_input("HAS-BLED Score (0 to 9)",
-                           min_value=0, max_value=9, value=3, key="has_bled")
-alcohol  = st.number_input("High-Risk Alcohol Consumption (0=No, 1=Yes)",
-                           min_value=0, max_value=1, value=0, key="alc")
-pai      = st.number_input("Platelet Aggregation Inhibitor Therapy (0=No, 1=Yes)",
-                           min_value=0, max_value=1, value=0, key="pai")
-oat      = st.number_input("Oral Anticoagulation Therapy (0=No, 1=Yes)",
-                           min_value=0, max_value=1, value=0, key="oat")
-bridge   = st.number_input("Perioperative Bridging Therapy (0=No, 1=Yes)",
-                           min_value=0, max_value=1, value=0, key="bridge")
+# 1) Gather user inputs (use unique `key=` to avoid ID conflicts):
+has_bled = st.number_input(
+    "HAS-BLED Score (0 to 9)",
+    min_value=0, max_value=9, value=3, key="has_bled"
+)
 
-# 2) Button to generate
+alcohol_choice = st.radio(
+    "High-Risk Alcohol Consumption?", ("No", "Yes"), key="alc_radio"
+)
+alcohol = 1 if alcohol_choice == "Yes" else 0
+
+pai_choice = st.radio(
+    "Platelet Aggregation Inhibitor Therapy?", ("No", "Yes"), key="pai_radio"
+)
+pai = 1 if pai_choice == "Yes" else 0
+
+oat_choice = st.radio(
+    "Oral Anticoagulation Therapy?", ("No", "Yes"), key="oat_radio"
+)
+oat = 1 if oat_choice == "Yes" else 0
+
+bridge_choice = st.radio(
+    "Perioperative Bridging Therapy?", ("No", "Yes"), key="bridge_radio"
+)
+bridge = 1 if bridge_choice == "Yes" else 0
+
+# 2) When user clicks "Generate", show risk & nomogram
 if st.button("Generate"):
-    # (A) Calculate the predicted risk from logistic model
+    # (A) Calculate logistic predicted risk
     risk = compute_risk(has_bled, alcohol, pai, oat, bridge)
     st.write(f"**Predicted Risk:** {risk*100:.2f}%")
 
-    # (B) Generate the nomogram figure from simpleNomo
-    #     Ensure this file name matches your updated Excel file in the same folder.
-    excel_path = "model_2.xlsx"  # <-- Use your corrected Excel filename
+    # (B) Generate the nomogram from your Excel file
+    excel_path = "model.xlsx"  # must match your file name
     fig = simpleNomo.nomogram(
         path=excel_path,
         result_title="Postoperative Bleeding Risk",
