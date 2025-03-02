@@ -45,7 +45,7 @@ _Note:_ The nomogram itself does **not** dynamically move pointers, but
 the axes for binary variables will now only show **0** and **1**.
 """)
 
-# --- A) User inputs with unique keys ---
+# --- A) User inputs ---
 has_bled = st.number_input(
     "HAS-BLED Score (0 to 9)",
     min_value=0, max_value=9, value=3, key="has_bled"
@@ -73,17 +73,31 @@ if st.button("Generate"):
     risk = compute_risk(has_bled, alcohol, pai, oat, bridge)
     st.write(f"**Predicted Risk:** {risk*100:.2f}%")
 
-    # 2) Generate nomogram from your Excel file
-    excel_path = "model_2.xlsx"  # Must match the file name
+    # 2) Generate nomogram from your Excel file.
+    #    The key is to adjust fig_width + single_height + total_point
+    excel_path = "model_2.xlsx"  # your Excel
     fig = simpleNomo.nomogram(
         path=excel_path,
         result_title="Postoperative Bleeding Risk",
-        fig_width=10,
-        single_height=0.45,
+        
+        # Make the figure a bit wider:
+        fig_width=12,
+        
+        # Increase the vertical space per row:
+        single_height=1.0,  # try 1.0, 1.2, or bigger as needed
+        
         dpi=300,
+        
+        # Control the lines on each axis:
         ax_para={"c": "black", "linewidth": 1.3, "linestyle": "-"},
+        
+        # Control the tick marks themselves:
         tick_para={"direction": "in", "length": 3, "width": 1.5},
+        
+        # Font size/style of X tick labels
         xtick_para={"fontsize": 10, "fontfamily": "Arial", "fontweight": "bold"},
+        
+        # Y‐axis label style (which is often turned sideways).
         ylabel_para={
             "fontsize": 12,
             "fontname": "Arial",
@@ -92,7 +106,9 @@ if st.button("Generate"):
             "color": "black",
             "rotation": "horizontal"
         },
-        total_point=100
+        
+        # Raise this if your total points can go above 100:
+        total_point=400
     )
 
     # 3) Show the figure in Streamlit
