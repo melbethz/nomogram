@@ -38,21 +38,21 @@ st.markdown("""
 - Enter the predictor values below.
 - Click **Generate** to see the standard nomogram image and the predicted risk
   based on the logistic‐regression model.
-  
+
 _Note:_ The *simpleNomo* nomogram is static (it does not dynamically place pointers).
 You can visually interpret the chart or rely on the computed risk below.
 """)
 
-# 1) User inputs (unique `key` for each widget)
+# 1) User inputs (each with a unique `key`)
 has_bled = st.number_input("HAS-BLED Score (0 to 9)",
                            min_value=0, max_value=9, value=3, key="has_bled")
-alcohol  = st.number_input("High-Risk Alcohol (0=No, 1=Yes)",
+alcohol  = st.number_input("High-Risk Alcohol Consumption (0=No, 1=Yes)",
                            min_value=0, max_value=1, value=0, key="alc")
-pai      = st.number_input("Platelet Aggregation Inhibitor (0=No, 1=Yes)",
+pai      = st.number_input("Platelet Aggregation Inhibitor Therapy (0=No, 1=Yes)",
                            min_value=0, max_value=1, value=0, key="pai")
-oat      = st.number_input("Oral Anticoagulation (0=No, 1=Yes)",
+oat      = st.number_input("Oral Anticoagulation Therapy (0=No, 1=Yes)",
                            min_value=0, max_value=1, value=0, key="oat")
-bridge   = st.number_input("Perioperative Bridging (0=No, 1=Yes)",
+bridge   = st.number_input("Perioperative Bridging Therapy (0=No, 1=Yes)",
                            min_value=0, max_value=1, value=0, key="bridge")
 
 # 2) Button to generate
@@ -62,7 +62,8 @@ if st.button("Generate"):
     st.write(f"**Predicted Risk:** {risk*100:.2f}%")
 
     # (B) Generate the nomogram figure from simpleNomo
-    excel_path = "model_2.xlsx"  # Update path if needed
+    #     Ensure this file name matches your updated Excel file in the same folder.
+    excel_path = "model_correct.xlsx"  # <-- Use your corrected Excel filename
     fig = simpleNomo.nomogram(
         path=excel_path,
         result_title="Postoperative Bleeding Risk",
