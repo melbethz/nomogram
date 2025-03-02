@@ -65,10 +65,10 @@ if st.button("Generate"):
     ]
     y_positions = np.array([5, 4, 3, 2, 1, 0])
     
-    # HAS-BLED score line
+    # HAS-BLED score line (with scale inside the line)
     ax.hlines(y=5, xmin=0, xmax=100, color="black", linewidth=1.5)
     for i in range(10):
-        ax.text(i * 10, 5.2, str(i), fontsize=10, fontweight="bold", ha="center")
+        ax.text(i * 10, 5.1, str(i), fontsize=10, fontweight="bold", ha="center")
     
     # Binary variable dashed lines
     for y_pos in y_positions[1:]:
@@ -86,7 +86,7 @@ if st.button("Generate"):
     # Format X-axis
     ax.set_xticks(points_scale)
     ax.set_xticklabels(points_scale, fontsize=10, fontweight="bold")
-    ax.set_xlim(-10, 110)
+    ax.set_xlim(0, 100)
     ax.set_ylim(-1, 6)
     
     # Secondary X-axis for total score
