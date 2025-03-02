@@ -77,7 +77,7 @@ if st.button("Generate"):
     st.write(f"**Predicted Risk:** {risk*100:.2f}%")
 
     # (B) Generate the nomogram from your Excel file
-    excel_path = "model.xlsx"  # must match your file name
+    excel_path = "model_2.xlsx"  # must match your file name
     fig = simpleNomo.nomogram(
         path=excel_path,
         result_title="Postoperative Bleeding Risk",
