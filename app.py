@@ -82,6 +82,42 @@ if st.button("Generate"):
         },
         total_point=100
     )
-
+    
+    # Fix binary variable tick marks - modify axes after nomogram creation
+    axes = fig.get_axes()
+    
+    # Get label texts for each axis to identify binary variables
+    # We'll check which axes have labels matching our binary variables
+    binary_var_names = [
+        "High-risk Alcohol Consumption", 
+        "Oral Anticoagulation Therapy",
+        "Platelet Aggregation Inhibitor Therapy", 
+        "Perioperative Bridging Therapy"
+    ]
+    
+    # Match variable names (adjusting for potential slight differences)
+    for ax in axes:
+        if hasattr(ax, 'get_ylabel'):
+            label = ax.get_ylabel()
+            # Check if this axis is for a binary variable
+            is_binary = any(binary_name.lower() in label.lower() for binary_name in binary_var_names)
+            
+            if is_binary:
+                # Get current x-axis limits
+                x_min, x_max = ax.get_xlim()
+                
+                # Remove all existing ticks
+                ax.clear()
+                
+                # Reset the x-limits
+                ax.set_xlim(x_min, x_max)
+                
+                # Set only 0 and 1 as tick marks
+                ax.set_xticks([x_min, x_max])
+                ax.set_xticklabels(["0", "1"])
+                
+                # Restore the label
+                ax.set_ylabel(label)
+    
     # Show the nomogram in Streamlit
     st.pyplot(fig)
