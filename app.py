@@ -63,7 +63,7 @@ if st.button("Generate"):
 
     # (B) Generate the nomogram figure from simpleNomo
     #     Ensure this file name matches your updated Excel file in the same folder.
-    excel_path = "model_correct.xlsx"  # <-- Use your corrected Excel filename
+    excel_path = "model_2.xlsx"  # <-- Use your corrected Excel filename
     fig = simpleNomo.nomogram(
         path=excel_path,
         result_title="Postoperative Bleeding Risk",
