@@ -1,3 +1,5 @@
+
+```python
 import math
 import streamlit as st
 import simpleNomo
@@ -70,8 +72,8 @@ if st.button("Generate"):
         single_height=0.45,
         dpi=300,
         ax_para={"c": "black", "linewidth": 1.3, "linestyle": "-"},
-        tick_para={"direction": "in", "length": 3, "width": 1.5, "values": [0, 1]},
-        xtick_para={"fontsize": 10, "fontfamily": "Arial", "fontweight": "bold", "values": [0, 1]},
+        tick_para={"direction": "in", "length": 3, "width": 1.5},
+        xtick_para={"fontsize": 10, "fontfamily": "Arial", "fontweight": "bold"},
         ylabel_para={
             "fontsize": 12,
             "fontname": "Arial",
@@ -82,6 +84,11 @@ if st.button("Generate"):
         },
         total_point=100
     )
+
+    # Manually set x-axis ticks to 0 and 1
+    ax = fig.gca()
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(['0', '1'])
 
     # Show the nomogram in Streamlit
     st.pyplot(fig)
