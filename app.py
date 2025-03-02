@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 ########################################
 # Logistic-Regression Coefficients
-# (Replace with your own if needed)
 ########################################
 INTERCEPT = -3.7634
 C_HAS     =  0.0284
@@ -16,7 +15,7 @@ C_BRIDGE  =  1.0557
 
 def compute_risk(has_bled, alcohol, pai, oat, bridging):
     """
-    Computes predicted probability using your logistic model:
+    Computes predicted probability using the logistic model:
     Probability = 1 / (1 + exp( - (intercept + sum_of_coeffs * X) ))
     """
     y = (INTERCEPT
@@ -36,24 +35,15 @@ st.title("Postoperative Bleeding Nomogram & Risk Calculator")
 st.markdown("""
 **Instructions:**
 - Enter the predictor values below.
-- Click **Generate** to see the standard nomogram image and the predicted risk
-  based on the logistic‐regression model.
-  
-_Note:_ The *simpleNomo* nomogram is static (it does not dynamically place pointers).
-You can visually interpret the chart or rely on the computed risk below.
+- Click **Generate** to see the nomogram and the predicted risk.
 """)
 
-# 1) User inputs (unique `key` for each widget)
-has_bled = st.number_input("HAS-BLED Score (0 to 9)",
-                           min_value=0, max_value=9, value=3, key="has_bled")
-alcohol  = st.number_input("High-Risk Alcohol (0=No, 1=Yes)",
-                           min_value=0, max_value=1, value=0, key="alc")
-pai      = st.number_input("Platelet Aggregation Inhibitor (0=No, 1=Yes)",
-                           min_value=0, max_value=1, value=0, key="pai")
-oat      = st.number_input("Oral Anticoagulation (0=No, 1=Yes)",
-                           min_value=0, max_value=1, value=0, key="oat")
-bridge   = st.number_input("Perioperative Bridging (0=No, 1=Yes)",
-                           min_value=0, max_value=1, value=0, key="bridge")
+# 1) User Inputs
+has_bled = st.number_input("HAS-BLED Score (0 to 9)", min_value=0, max_value=9, value=3)
+alcohol  = st.number_input("High-Risk Alcohol (0=No, 1=Yes)", min_value=0, max_value=1, value=0)
+pai      = st.number_input("Platelet Aggregation Inhibitor (0=No, 1=Yes)", min_value=0, max_value=1, value=0)
+oat      = st.number_input("Oral Anticoagulation (0=No, 1=Yes)", min_value=0, max_value=1, value=0)
+bridge   = st.number_input("Perioperative Bridging (0=No, 1=Yes)", min_value=0, max_value=1, value=0)
 
 # 2) Button to generate
 if st.button("Generate"):
@@ -73,14 +63,14 @@ if st.button("Generate"):
         tick_para={"direction": "in", "length": 3, "width": 1.5},
         xtick_para={"fontsize": 10, "fontfamily": "Arial", "fontweight": "bold"},
         ylabel_para={
-            "fontsize": 12,
+            "fontsize": 14,  # Increased font size for readability
             "fontname": "Arial",
-            "labelpad": 100,
+            "labelpad": 110,  # Adjusted label padding for correct alignment
             "loc": "center",
             "color": "black",
-            "rotation": "horizontal"
+            "rotation": 0  # Set to horizontal for better readability
         },
-        total_point=100
+        total_point=350  # Adjusted to match scale in the provided nomogram image
     )
 
     # Show the nomogram in Streamlit
